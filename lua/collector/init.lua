@@ -14,10 +14,10 @@ function fillInBlanks(textTable, maxHeight)
   local height = 0
   local book_end = "│ │"
   local is_statement = false
-  for key, line in pairs(textTable) do
+  for line in pairs(textTable) do
     currentRow = currentRow + 1
     table.insert(filled, currentRow, line)
-    
+
     local hasDot = string.find(line, "%. ") ~= nil
     local hasSpare = string.find(line, "           ") ~= nil
 
@@ -27,7 +27,7 @@ function fillInBlanks(textTable, maxHeight)
       is_statement = false
     end
 
-    height = BB.tableLength(filled) 
+    height = BB.tableLength(filled)
     if height < maxHeight and is_statement then
       currentRow = currentRow + 1
       table.insert(filled, currentRow, fillLine("", "", 56, book_end).."\n")
@@ -211,7 +211,11 @@ function M.setup()
     local current_card = vim.api.nvim_get_current_line()
     local card_data = CD.getCardData(current_card)
     local collectorInfo = collectorPrint(card_data)
-    local fittedOracle = fillInOracleText(getOracleText(card_data))
+    -- local fittedOracle = fillInOracleText(getOracleText(card_data))
+
+    -- CD.downloadImage(getName(card_data), getArtworkImageURL(card_data))
+
+    local artwork_bin = CD.readArtworkFile(getName(card_data))
 
     -- -- vim.api.nvim_buf_set_lines(mtgBuff, 0, -1, false, collectorInfo)
     -- vim.api.nvim_buf_set_lines(mtgBuff, 0, -1, false, fittedOracle)

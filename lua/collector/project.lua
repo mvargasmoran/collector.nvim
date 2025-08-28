@@ -25,6 +25,7 @@
 -- TODO: Get a good hashing thing
 -- DONE: trim whitespace at the end
 -- DONE: clean lines from weird unicode characters for any math purposes
+-- DONE: cache the artwork crop image JPG
 -- TODO: put back the "nice" but weird unicode characters, is this one: —
 -- TODO: Add empty line padding if needed, to match some "similar height" for all cards
 -- TODO: Move to a database

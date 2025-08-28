@@ -19,22 +19,26 @@ function CD.card_file_read(file_name)
 end
 
 function CD.cacheCardSearchResponse(file_name, card_response)
-  local file = io.open(file_name, "w")
+  local file, error = io.open(file_name, "w")
+  if not file then
+    print("Error opening file:", error)
+    return
+  end
 
   file:write(card_response)
 
   file:close()
 end
 
-function readArtworkFile(image_path)
-  local image_file, err = io.open(card_path, "rb")
+function CD.readArtworkFile(card_name)
+  local image_path = BB.crapHash(card_name)..".png"
+  local image_file, err = io.open(image_path, "rb")
   if not image_file then
-    print("failed to open image file")
+    print("failed to open image file", err)
     return ""
   end
 
   local contents = image_file:read("*a")
-  print('DEBUGPRINT[73]: card_retrieval.lua:36: contents=' .. vim.inspect(contents))
   image_file:close()
 end
 
@@ -50,6 +54,10 @@ function CD.downloadImage(card_name, artwork_url)
   h:close()
 
   local file = io.open(BB.crapHash(card_name)..".png", "w")
+  if not file then
+    print("Error opening file:", error)
+    return
+  end
 
   file:write(rawdata)
 
@@ -69,6 +77,7 @@ function CD.requestSearchCard(card_name)
   local t = vim.json.decode(rawdata)
   -- local cardStuff = vim.json.decode(rawdata)
   -- print(vim.inspect(t))
+
   return t;
 end
 
@@ -84,11 +93,27 @@ function CD.getCardData(card_name)
     print("using cached file")
     local card_file_contents = CD.card_file_read(crappy_card_hash)
     local card_json = vim.json.decode(card_file_contents)
+
+    if(CD.card_file_exists(crappy_card_hash..".png") == false) then
+      local art_crop_url = card_json["data"][1]["image_uris"]["art_crop"]
+      CD.downloadImage(card_name, art_crop_url)
+    end
+
     return card_json["data"][1]
   else
     print("using network request")
     local requested_card_data = CD.requestSearchCard(card_name)
+    if requested_card_data == nil then
+      print("failed request")
+    end
+
     CD.cacheCardSearchResponse(crappy_card_hash, vim.json.encode(requested_card_data))
+
+    if(CD.card_file_exists(crappy_card_hash..".png") == false) then
+      local art_crop_url = requested_card_data["image_uris"]["art_crop"]
+      CD.downloadImage(card_name, art_crop_url)
+    end
+
     return requested_card_data["data"][1]
   end
 end
